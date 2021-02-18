@@ -1,1 +1,1 @@
-from numero_por_extenso.numero_por_extenso import numero_por_extenso
+from numero_por_extenso.numero_por_extenso import real, monetario
