@@ -153,7 +153,7 @@ def real(numero:float or str):
     return extenso
 
 def monetario(numero:float or str):
-    inteiro, decimal = formatar(numero)
+    inteiro, decimal = formatar(str(numero))
     extenso = milhares(separar_casas(inteiro))
 
     if inteiro == 0:

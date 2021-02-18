@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = 'numero_por_extenso',
-    version = '2.0.0',
+    version = '2.0.1',
     author = 'Daniel Chaves de Lima',
     author_email = 'danielchaves001@gmail.com',
     packages = ['numero_por_extenso'],
