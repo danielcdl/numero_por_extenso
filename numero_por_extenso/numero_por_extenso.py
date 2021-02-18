@@ -15,6 +15,8 @@ MILHAR = (('milhão', 'milhões'), ('bilhão', 'bilhões'), ('trilhão', 'trilh�
     ('quindecilhão', 'quindecilhões'), ('sexdecilhão', 'sexdecilhões'), ('sepdecilhão', 'sepdecilhões'), ('octodecilhão', 'octodecilhões'),
     ('novemdecilhão', 'novemdecilhões')
 )
+
+
 def unidade_dezena_centena(terno):
     numero_extenso = ''
     termos = len(terno)
@@ -90,7 +92,6 @@ def separar_casas(numero):
     digitos = list(str(numero))
     tamanho = len(digitos)
 
-    
     casa = tamanho % 3
     casas = []
     terno = []
@@ -101,31 +102,38 @@ def separar_casas(numero):
             terno = []
     return casas
 
-def numero_por_extenso(numero:float):
-    numero = str(numero).replace('.',',')
-    divisao = numero.split(',')
-    if len(divisao) == 1:
-        inteiro = int(divisao[0]) 
-        decimal = None
-    elif len(divisao) == 2:
-        inteiro = int(divisao[0])
-        decimal = divisao[1]
+
+def formatar(numero:str):
+    numero = str(float(numero.replace(',','.')))
+    divisao = numero.split('.')
+    
+    if 0 < len(divisao) < 3:
+        if len(divisao[0]) > 33:
+            raise ValueError('Valor muito grande')
+        else:
+            inteiro = int(divisao[0])
+
+        if len(divisao) == 2:
+            if len(divisao[1]) > 35:
+                raise ValueError('Valor decimal muito grande')
+            else:
+                decimal = divisao[1]
+        else:
+            decimal = None
     else:
         raise ValueError('Número não formatado corretamente')
-    
+
+    return (inteiro, decimal)
+
+
+def real(numero:float or str):
+    inteiro, decimal = formatar(str(numero))
     extenso = milhares(separar_casas(inteiro))
+    
     if decimal != None and int(decimal) != 0:
-        while True:
-            if decimal[-1] == '0':
-                decimal = decimal[:-1]
-            else:
-                break
-        ordem = len(decimal)
-        if ordem > 12:
-            if ordem > 35:
-                raise ValueError("Valor decimal não pode ser escrito pela lib")
-            else:
-                ordem = 8 + ordem // 3 
+        ordem = len(decimal) - 1
+        if ordem > 11:
+            ordem = 7 + ordem // 3 
     
         if inteiro == 0:
             extenso = ''
@@ -133,22 +141,70 @@ def numero_por_extenso(numero:float):
             extenso += ' inteiro e '
         else:
             extenso += ' inteiros e '
-        if int(decimal) == 1:
+
+        decimal = int(decimal)
+        if decimal == 1:
             plural = 0
         else:
             plural = 1
-        extenso += milhares(separar_casas(decimal)) + ' ' + DECIMAIS[ordem - 1][plural]
-        
 
+        extenso += milhares(separar_casas(decimal)) + ' ' + DECIMAIS[ordem][plural]
+        
     return extenso
+
+def monetario(numero:float or str):
+    inteiro, decimal = formatar(numero)
+    extenso = milhares(separar_casas(inteiro))
+
+    if inteiro == 0:
+            extenso = ''
+    elif inteiro == 1:
+        extenso += ' real'
+    else:
+        extenso += ' reais'
+
     
+    if decimal != None and int(decimal) != 0:
+        ordem = len(decimal)
+        if ordem == 1:
+            decimal += '0'
+            ordem = 2
+        elif ordem > 11:
+            ordem = 7 + ordem // 3
+    
+        if inteiro == 0:
+            extenso = ''
+        elif inteiro == 1:
+            extenso += ' e '
+        else:
+            extenso += ' e '
+
+        decimal = int(decimal)
+        if decimal == 1:
+            plural = 0
+        else:
+            plural = 1
+        
+        extenso += milhares(separar_casas(decimal))
+        if decimal == 1:
+            if ordem < 3:
+                extenso += ' centavo'
+            else:
+                extenso +=' ' + DECIMAIS[ordem - 3][plural] + ' de centavo'
+        elif decimal < 100:
+            extenso +=' centavos'
+        else:
+            extenso +=' ' + DECIMAIS[ordem - 3][plural] + ' de centavo'
+        
+    return extenso
+
 if __name__ == '__main__':
     
     while True:
         try:
-            numero = input('Digite um número inteiro: ')
-            extenso = numero_por_extenso(numero)
+            numero = input('Digite um número real: ')
+            extenso = monetario(numero)
             print(numero, extenso)
             break
-        except ValueError:
-            print('ERRO!!', end=' ')
+        except ValueError as erro:
+            print('ERRO!! ', erro)
