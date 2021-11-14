@@ -7,7 +7,7 @@ pip install numero-por-extenso
 ```
 ## Como usar
 
-A entrada pode ser um números do tipo int, float, ou str(com o número no formato brasileiro), e o retorno é uma string com o numero por extenso no formato de numérico(real) ou monetário.
+A entrada pode ser um número do tipo int, float, ou str(com o número no formato brasileiro), e o retorno é uma string com o número por extenso no formato de numérico(real) ou monetário.
 
 * Entrada do tipo int:
 
@@ -44,4 +44,4 @@ numero7 = numero_por_extenso.real("9870,56")
 numero8 = numero_por_extenso.monetario("260,99") 
 # 'duzentos e sessenta reais e noventa e nove centavos'
 ```
-OBS.: A entrada deve posuir apenas o separador da parte inteira com a decimal, que é pode ser a virgula(,) ou o ponto(.)
+OBS.: No caso de uma string, entrada deve posuir apenas o separador da parte inteira com a decimal, que é pode ser a virgula(,) ou o ponto(.)
