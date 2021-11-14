@@ -25,8 +25,8 @@ numero2 = numero_por_extenso.monetario(45)
 numero3 = numero_por_extenso.real(15.86)   
 # 'quinze inteiros e oitenta e seis centésimos' 
 
-numero4 = numero_por_extenso.real(59.87)   
-# 'cinquenta e nove inteiros e oitenta e sete centésimos'
+numero4 = numero_por_extenso.monetario(59.87)  
+# 'cinquenta e nove reais e oitenta e sete centavos'
 ```
 
 * Entrada do tipo str:
