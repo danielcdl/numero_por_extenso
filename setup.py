@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name = 'numero_por_extenso',
-    version = '2.0.1',
+    version = '2.0.2',
     author = 'Daniel Chaves de Lima',
     author_email = 'danielchaves001@gmail.com',
     packages = ['numero_por_extenso'],
     description = 'Conversor para escrever número por extenso',
-    long_description = 'Conversor para escrever números por extenso no formato PT-br',
+    long_description = 'Conversor para escrever números por extenso no formato PT-Br',
     url = 'https://github.com/danielcdl/numero_por_extenso',
     project_urls = {
         'Código fonte': 'https://github.com/danielcdl/numero_por_extenso',
