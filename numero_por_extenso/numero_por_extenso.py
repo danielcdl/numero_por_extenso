@@ -104,7 +104,11 @@ def separar_casas(numero):
 
 
 def formatar(numero:str):
-    numero = str(float(numero.replace(',','.')))
+    try:
+        numero = str(float(numero.replace(',','.')))
+    except ValueError:
+        raise ValueError('Número não formatado corretamente')
+    
     divisao = numero.split('.')
     
     if 0 < len(divisao) < 3:
