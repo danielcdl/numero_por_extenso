@@ -44,4 +44,8 @@ numero7 = numero_por_extenso.real("9870,56")
 numero8 = numero_por_extenso.monetario("260,99") 
 # 'duzentos e sessenta reais e noventa e nove centavos'
 ```
-OBS.: No caso de uma string, entrada deve posuir apenas o separador da parte inteira com a decimal, que é pode ser a virgula(,) ou o ponto(.)
+OBS.: No caso de uma string, entrada deve possuir apenas o separador da parte inteira com a decimal, que é pode ser a virgula(,) ou o ponto(.)
+
+## Entrada máxima
+
+o maior entrada possível é o número

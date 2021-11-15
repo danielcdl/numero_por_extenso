@@ -1,21 +1,6 @@
-DECIMAIS = (('décimo', 'décimos'), ('centésimo', 'centésimos'), ('milésimo', 'milésimos'), ('décimo de milésimo', 'décimos de milésimo'),
-    ('centésimo de milésimo', 'centésimos de milésimo'), ('milionésimo', 'milionésimos'), ('décimo de milionésimo', 'décimos de milionésimo'),
-    ('centésimo de milionésimo', 'centésimos de milionésimo'), ('bilionésimo', 'bilionésimos'), ('décimo de bilionésimo', 'décimos de bilionésimo'), 
-    ('centésimo de bilionésimo', 'centésimos de bilionésimo'), ('trilionésimo', 'trilionésimos'), ('quatrilionésimo', 'quatrilionésimos'),
-    ('quintilionésimo', 'quintilionésimos'), ('sextilionésimo', 'sextilionésimos'), ('septilionésimo', 'septilionésimos'), ('octilionésimo', 'octilionésimos'),
-    ('nonilionésimo', 'nonilionésimos'), ('decilionésimo', 'decilionésimos')
-)
-UNIDADES = ('zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove')
-DEZENA_ESPECIAL = ('', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove')
-DEZENAS = ('', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa')
-CENTENAS = ('cem', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos','oitocentos', 'novecentos')
-MILHAR = (('milhão', 'milhões'), ('bilhão', 'bilhões'), ('trilhão', 'trilhões'), ('quatrilhão', 'quatrilhões'), ('quintilhão', 'quintilhões'),
-    ('sextilhão', 'sextilhões'), ('septilhão', 'septilhões'), ('octilhão', 'octilhões'), ('nonilhão', 'nonilhões'), ('decilhão', 'decilhões'),
-    ('unodecilhão', 'unodecilhões'), ('duodecilhão', 'duodecilhões'), ('tredecilhão', 'tredecilhões'), ('quatuordecilhão', 'quatuordecilhões'),
-    ('quindecilhão', 'quindecilhões'), ('sexdecilhão', 'sexdecilhões'), ('sepdecilhão', 'sepdecilhões'), ('octodecilhão', 'octodecilhões'),
-    ('novemdecilhão', 'novemdecilhões')
-)
-
+from decimal import *
+import decimal
+from numeros_base import *
 
 def unidade_dezena_centena(terno):
     numero_extenso = ''
@@ -102,40 +87,77 @@ def separar_casas(numero):
             terno = []
     return casas
 
+def validar_tamanho(inteiro: int, decimal:str):
+    max_algarismo_inteiro = 63
+    max_algarismo_decimal = 36
+    # A parte inteira  pode ter no maximo 33 algarismos
+    if inteiro > int(max_algarismo_inteiro * '9'):
+        raise ValueError('Valor muito grande')
 
-def formatar(numero:str):
-    try:
-        numero = str(float(numero.replace(',','.')))
-    except ValueError:
-        raise ValueError('Número não formatado corretamente')
+    # A parte inteira  pode ter no maximo 33 algarismos
+    if len(decimal) > max_algarismo_decimal:
+        raise ValueError('Valor decimal muito grande')
+
+def formatar_numero(numero:int or float or str):
+    '''
+    Função que formata um número real e retorna a parte inteira e a decimal.
+    :param numero: Número real a ser formatado. Caso a entrada seja uma string, ela deverá estar no formato numérico brasileiro. Ex.: '1.000,00' ou '1000,00' ou '1000'
+    return: (inteiro: int, decimal: str)
+    '''
     
-    divisao = numero.split('.')
+    if isinstance(numero, int):
+        return (numero, '0')
+    elif isinstance(numero, str):
+        # remove os pontos
+        numero = numero.replace('.', '')
+        # Substitui a vírgula por ponto
+        numero = numero.replace(',', '.')
+
+        # verifica se o número é um float
+        try:
+            float(numero)
+        except ValueError:
+            raise TypeError('Número não formatado corretamente')
+
+        partes = numero.split('.')
+        inteiro = int(partes[0])
+        if len(partes) == 1:
+            decimal = '0'
+        elif len(partes) == 2:
+            decimal = partes[1]
+        else:
+            raise Exception('Número inválido')
+
+        validar_tamanho(inteiro, decimal)
+        return (inteiro, decimal)
+        
     
-    if 0 < len(divisao) < 3:
-        if len(divisao[0]) > 33:
-            raise ValueError('Valor muito grande')
-        else:
-            inteiro = int(divisao[0])
+    # se não for nenhum dos tipos acima, é porque o número não é um inteiro ou float.
+    if numero == int(numero):
+        return (int(numero), '0')
 
-        if len(divisao) == 2:
-            if len(divisao[1]) > 35:
-                raise ValueError('Valor decimal muito grande')
-            else:
-                decimal = divisao[1]
-        else:
-            decimal = None
-    else:
-        raise ValueError('Número não formatado corretamente')
+    inteiro = int(numero)
+    decimal = numero - int(numero)
+    decimal = str(decimal).split('.')[1]
 
+    validar_tamanho(inteiro, decimal)
+    
     return (inteiro, decimal)
 
-
 def real(numero:float or str):
-    inteiro, decimal = formatar(str(numero))
+    '''
+    Função que recebe um número real e retorna o número por extenso.
+    :param numero: Número real a ser formatado.
+    '''
+
+    inteiro, decimal = formatar_numero(numero)
     extenso = milhares(separar_casas(inteiro))
     
-    if decimal != None and int(decimal) != 0:
-        ordem = len(decimal) - 1
+    if int(decimal) != 0:
+        ordem = len(str(decimal)) - 1
+        decimal = int(decimal)
+        
+        
         if ordem > 11:
             ordem = 7 + ordem // 3 
     
@@ -146,7 +168,6 @@ def real(numero:float or str):
         else:
             extenso += ' inteiros e '
 
-        decimal = int(decimal)
         if decimal == 1:
             plural = 0
         else:
@@ -157,7 +178,7 @@ def real(numero:float or str):
     return extenso
 
 def monetario(numero:float or str):
-    inteiro, decimal = formatar(str(numero))
+    inteiro, decimal = formatar_numero(str(numero))
     extenso = milhares(separar_casas(inteiro))
 
     if inteiro == 0:
@@ -205,10 +226,9 @@ def monetario(numero:float or str):
 if __name__ == '__main__':
     
     while True:
-        try:
-            numero = input('Digite um número real: ')
-            extenso = monetario(numero)
-            print(numero, extenso)
-            break
-        except ValueError as erro:
-            print('ERRO!! ', erro)
+        
+        # numero = input('Digite um número real: ')
+        numero = 0.02
+        print(numero)
+        extenso = real(numero)
+        print(numero, extenso)
