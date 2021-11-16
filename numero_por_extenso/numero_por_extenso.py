@@ -1,5 +1,4 @@
-from decimal import *
-import decimal
+import re
 from numeros_base import *
 
 def unidade_dezena_centena(terno):
@@ -46,9 +45,15 @@ def milhares(ternos):
             else:
                 numero_extenso += unidade_dezena_centena(terno) + ' ' + MILHAR[termos - 3][1]
 
-            if ternos[1:] == [[0, 0, 0],[0, 0, 0]]:
+            retornar = True       
+            for terno_ in ternos[1:]:
+                if terno_ != [0, 0, 0]:
+                    retornar = False
+                    break
+            
+            if retornar:
                 return numero_extenso
-            else:
+            else:            
                 numero_extenso += ' ' + milhares(ternos[1:])
         else:
             numero_extenso += milhares(ternos[1:])
@@ -87,33 +92,42 @@ def separar_casas(numero):
             terno = []
     return casas
 
-def validar_tamanho(inteiro: int, decimal:str):
-    max_algarismo_inteiro = 63
+def validar_tamanho(inteiro: int, decimal:int):
+    max_algarismo_inteiro = 66
     max_algarismo_decimal = 36
-    # A parte inteira  pode ter no maximo 33 algarismos
+
+    # A parte inteira  pode ter no maximo 66 algarismos
     if inteiro > int(max_algarismo_inteiro * '9'):
         raise ValueError('Valor muito grande')
 
-    # A parte inteira  pode ter no maximo 33 algarismos
-    if len(decimal) > max_algarismo_decimal:
+    # A parte inteira  pode ter no maximo 36 algarismos
+    if decimal > int(max_algarismo_decimal * '9'):
         raise ValueError('Valor decimal muito grande')
 
-def formatar_numero(numero:int or float or str):
+def formatar_numero(numero:str, padrao):
     '''
     Função que formata um número real e retorna a parte inteira e a decimal.
-    :param numero: Número real a ser formatado. Caso a entrada seja uma string, ela deverá estar no formato numérico brasileiro. Ex.: '1.000,00' ou '1000,00' ou '1000'
-    return: (inteiro: int, decimal: str)
+    :param numero: Número real a ser formatado.A entrada dever uma string, ela deverá estar no formato numérico brasileiro (ex.: '1.000,00' ou '1000,00' ou '1000') ou americano (ex.: '1,000.00' ou '1000.00' ou '1000')
+    :param padrao: Padrão de entrada. O padrão de entrada pode ser 'br' para o formato brasileiro ou 'us' para o formato americano.
+    return: (inteiro: int, decimal: int, casas_decimais: int)
     '''
     
-    if isinstance(numero, int):
-        return (numero, '0')
-    elif isinstance(numero, str):
-        # remove os pontos
-        numero = numero.replace('.', '')
-        # Substitui a vírgula por ponto
-        numero = numero.replace(',', '.')
+    if isinstance(numero, str):
+        if padrao == 'br':
+            correto = bool(re.match(r'^(\d{1,3})(\.\d{3})+(\,\d+)?$|^\d+(\,\d+)?$', numero))
+            if correto:
+                numero = numero.replace('.', '').replace(',', '.')
+            else:
+                raise ValueError(f'O número {numero} não está no padrão Pt-Br')
+        elif padrao == 'us':
+            correto = bool(re.match(r'^(\d{1,3})(\,\d{3})+(\.\d+)?$|^\d+(\.\d+)?$', numero))
 
-        # verifica se o número é um float
+            if correto:
+                numero = numero.replace(',', '')
+            else:
+                raise ValueError(f'O número {numero} não está no padrão US')
+        else:
+            raise ValueError(f'O padrão {padrao} é inválido')
         try:
             float(numero)
         except ValueError:
@@ -123,44 +137,33 @@ def formatar_numero(numero:int or float or str):
         inteiro = int(partes[0])
         if len(partes) == 1:
             decimal = '0'
-        elif len(partes) == 2:
-            decimal = partes[1]
         else:
-            raise Exception('Número inválido')
+            decimal = partes[1]
 
+        casas_decimais = len(decimal)
+        if int(decimal) == 0:
+            casas_decimais = 0
+
+        decimal = int(decimal)
         validar_tamanho(inteiro, decimal)
-        return (inteiro, decimal)
+        return (inteiro, decimal, casas_decimais)
+    else:
+        raise ValueError('Número não é uma string')
         
-    
-    # se não for nenhum dos tipos acima, é porque o número não é um inteiro ou float.
-    if numero == int(numero):
-        return (int(numero), '0')
 
-    inteiro = int(numero)
-    decimal = numero - int(numero)
-    decimal = str(decimal).split('.')[1]
-
-    validar_tamanho(inteiro, decimal)
-    
-    return (inteiro, decimal)
-
-def real(numero:float or str):
+def real(numero:str, padrao='br'):
     '''
     Função que recebe um número real e retorna o número por extenso.
     :param numero: Número real a ser formatado.
+    return: (numero_extenso: str)
     '''
 
-    inteiro, decimal = formatar_numero(numero)
+    inteiro, decimal, casas_decimais = formatar_numero(numero, padrao)
     extenso = milhares(separar_casas(inteiro))
     
-    if int(decimal) != 0:
-        ordem = len(str(decimal)) - 1
-        decimal = int(decimal)
-        
-        
-        if ordem > 11:
-            ordem = 7 + ordem // 3 
-    
+    if casas_decimais != 0:
+        ordem = casas_decimais - 1
+                
         if inteiro == 0:
             extenso = ''
         elif inteiro == 1:
@@ -228,7 +231,7 @@ if __name__ == '__main__':
     while True:
         
         # numero = input('Digite um número real: ')
-        numero = 0.02
-        print(numero)
-        extenso = real(numero)
+        numero = '123.456.789.098.765.432.109.002.333.005.010.015.999.000.000.000.000.018.024.200.906'
+        print(len(numero))
+        extenso = real(numero, 'br')
         print(numero, extenso)
